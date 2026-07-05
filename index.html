@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1a5276">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="博鸣报价">
+<title>博鸣报价单工具集</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo"><a href="index.html">博鸣报价</a></div>
+  <div class="nav-links">
+    <a href="index.html" class="active">首页</a>
+    <a href="renovation.html">改造报价</a>
+    <a href="sunroom.html">阳光房报价</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="hero">
+    <h1>博鸣报价单工具集</h1>
+    <p>基于专业模板的在线报价单生成工具，支持编辑、保存、打印与导出</p>
+  </div>
+
+  <div class="tool-grid">
+    <a href="renovation.html" class="tool-card">
+      <div class="icon">🔨</div>
+      <h3>精装房局部改造报价单</h3>
+      <p>基于领誉华府北区7栋301项目清单模板，支持改造项目表格、子项拆分、自动汇总与优惠价。</p>
+      <div class="tags">
+        <span>项目清单</span>
+        <span>子项支持</span>
+        <span>自动合计</span>
+        <span>优惠价</span>
+      </div>
+    </a>
+
+    <a href="sunroom.html" class="tool-card">
+      <div class="icon">☀️</div>
+      <h3>阳光房工程报价单</h3>
+      <p>基于120钢构阳光房系列工程预算清单模板，支持主材描述、多方案比价、约定条款与详细施工做法。</p>
+      <div class="tags">
+        <span>多方案比价</span>
+        <span>主材明细</span>
+        <span>施工做法</span>
+        <span>约定条款</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" style="margin-top: 40px;">
+    <div class="card-title">💾 数据管理</div>
+    <p style="font-size: 14px; color: var(--text-light); margin-bottom: 16px;">
+      所有报价数据自动保存在浏览器本地。您可以导出备份或导入之前保存的数据。
+    </p>
+    <div class="btn-group">
+      <button class="btn btn-outline" onclick="exportAllData()">📤 导出全部数据</button>
+      <label class="btn btn-outline" style="cursor:pointer;">
+        📥 导入数据
+        <input type="file" accept=".json" style="display:none" onchange="importAllData(this)">
+      </label>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/shared.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("sw.js").then(function(reg){
+      console.log("SW registered:", reg.scope);
+    }).catch(function(err){
+      console.log("SW registration failed:", err);
+    });
+  });
+}
+</script>
+</body>
+</html>
