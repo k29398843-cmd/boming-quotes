@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1a5276">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="博鸣报价">
+<title>阳光房工程报价单</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.mat-item { margin-bottom: 6px; display: flex; gap: 8px; align-items: flex-start; }
+.mat-item .mat-num { font-weight: 600; color: var(--primary); min-width: 24px; padding-top: 8px; }
+.mat-item textarea { flex: 1; min-height: 40px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo"><a href="index.html">博鸣报价</a></div>
+  <div class="nav-links">
+    <a href="index.html">首页</a>
+    <a href="renovation.html">改造报价</a>
+    <a href="sunroom.html" class="active">阳光房报价</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <div class="card-title">☀️ 阳光房工程报价单</div>
+    <div class="form-row">
+      <div class="form-group"><label>客户姓名</label><input type="text" id="clientName" placeholder="客户姓名" oninput="autoSave()"></div>
+      <div class="form-group"><label>联系电话</label><input type="tel" id="clientPhone" placeholder="联系电话" oninput="autoSave()"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>工程地址</label><input type="text" id="projectAddr" placeholder="工程地址" oninput="autoSave()"></div>
+      <div class="form-group"><label>报价日期</label><input type="date" id="quoteDate" oninput="autoSave()"></div>
+    </div>
+  </div>
+
+  <div class="card print-full">
+    <div class="card-title">一、主材部分</div>
+    <div id="materialsContainer"></div>
+    <div class="btn-group no-print"><button class="btn btn-sm btn-primary" onclick="addM()">＋ 添加主材项</button></div>
+  </div>
+
+  <div class="card print-full">
+    <div class="card-title">二、总价汇总</div>
+    <div class="plan-tabs no-print" id="planTabs"></div>
+    <div id="planPanels"></div>
+    <div class="btn-group no-print"><button class="btn btn-sm btn-primary" onclick="addPlan()">＋ 添加方案</button></div>
+  </div>
+
+  <div class="card print-full">
+    <div class="card-title">三、约定条款</div>
+    <div id="termsContainer"></div>
+    <div class="btn-group no-print"><button class="btn btn-sm btn-primary" onclick="addT()">＋ 添加条款</button></div>
+  </div>
+
+  <div class="card print-full">
+    <div class="card-title">四、详细施工做法</div>
+    <div id="constructionContainer"></div>
+    <div class="btn-group no-print"><button class="btn btn-sm btn-primary" onclick="addC()">＋ 添加做法项</button></div>
+  </div>
+
+  <div class="card print-full">
+    <div class="card-title">✍️ 签字确认</div>
+    <div class="signature-area">
+      <div class="signature-block">
+        <div class="label">甲方确认</div>
+        <div class="sign-line"><input type="text" placeholder="甲方签字" oninput="autoSave()"></div>
+      </div>
+      <div class="signature-block">
+        <div class="label">乙方确认</div>
+        <div class="sign-line"><input type="text" placeholder="乙方签字 / 盖章" oninput="autoSave()"></div>
+      </div>
+    </div>
+    <div style="margin-top:16px; max-width:250px;">
+      <div class="form-group"><label>日期</label><input type="date" id="signDate" oninput="autoSave()"></div>
+    </div>
+  </div>
+
+  <div class="card no-print">
+    <div class="btn-group">
+      <button class="btn btn-accent" onclick="printPage()">🖨️ 打印 / 导出PDF</button>
+      <button class="btn btn-outline" onclick="resetAll()">🗑️ 重置默认</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/shared.js"></script>
+<script>
+var data=null,ci=0,SK='sunroom_data';
+function D(){return{clientName:'',clientPhone:'',projectAddr:'',quoteDate:'',
+materials:['雨棚整体骨架外围及立柱采用120x100x5mm镀锌工字钢做主梁。','主体钢架焊好后钢架外立面加多120x120x3mm加强铝方通美观牢固。','雨棚内围副架采用100x100x3mm铝合金方通布设。','整体钢架焊接施工完后外侧加装水槽做好接缝防水。','雨棚顶铺设采用1.5mm厚固定长城铝板。','做一圈地梁宽300mm高240mm植钢筋混凝土这样做更牢固。'],
+plans:[{name:'方案一',items:[{name:'雨棚',price:2280,area:58.7},{name:'铝合金系列斯特睿120断桥系列固定窗',price:780,area:87.87},{name:'68断桥系列折叠门',price:1580,area:21.17}]},{name:'方案二',items:[{name:'雨棚',price:2280,area:80.35},{name:'铝合金系列斯特睿120断桥系列固定窗',price:780,area:96.15},{name:'68断桥系列折叠门',price:1580,area:21.17}]}],
+terms:['本报价不含土建改造墙体修补物业相关费用；如需开具发票税费另计。','质保说明：钢结构质保10年铝型材长城铝板质保10年防水部位质保5年。','付款方式：','施工工期：'],
+construction:[{title:'前期准备&预埋件施工(户外立柱必做)',items:['现场放线定位8根立柱点位核对间距垂直度标高统一预留3m成品高度。','混凝土基础/原有结构面植入化学锚栓/预埋钢板钢板厚度≥10mm尺寸200x200mm每块钢板配4套锚栓保证底座承重抗风。','预埋件找平调水平点焊临时固定养护达标后进入立柱安装。']},{title:'120#工字钢主体立柱加工+安装',items:['钢材下料:120#工字钢统一切割为3m定尺切口打磨平整去除毛刺。','防腐处理(室外核心工序):工字钢整体除锈>涂刷环氧富锌底漆2遍(防锈)外露结构面可加1遍户外金属面漆杜绝生锈。','立柱吊装/人工就位与底部预埋钢板满焊连接;顶部和雨棚主梁对接焊接全程靠靠尺线坠校正垂直度(偏差≤3mm)标高8根立柱高度严格统一3m。','所有焊接点做补漆二次防腐焊缝打磨光滑。']},{title:'铝合金方通饰面安装(外包包覆工艺)',items:['基层打底:工字钢外侧加装镀锌角码/专用连接件作为铝方通固定基座间距≤600mm保证饰面牢固不晃动。','铝方通加工:按工字钢外轮廓尺寸定制铝方通(整包式/分面拼接式二选一推荐整板折弯一体款美观防水)表面做氟碳喷涂/粉末喷涂(户外优先氟碳耐候防褪色)。','包覆安装:铝方通分片/整体扣装螺丝固定(螺丝做隐蔽处理)拼接缝隙打户外耐候结构胶防水防渗水防积灰。','收边处理:立柱底部顶部做铝合金收边条遮盖接口焊接整体收口整齐;底部预留排水避免漏水倒灌。']}],
+signA:'',signB:'',signDate:'',activePlan:0}}
+
+function init(){var s=loadData(SK,null);if(s){data=s;ci=data.activePlan||0;apply()}else{data=D();renderAll()}}
+function apply(){document.getElementById('clientName').value=data.clientName||'';document.getElementById('clientPhone').value=data.clientPhone||'';document.getElementById('projectAddr').value=data.projectAddr||'';document.getElementById('quoteDate').value=data.quoteDate||'';document.getElementById('signDate').value=data.signDate||'';var sigs=document.querySelectorAll('.signature-block .sign-line input');if(sigs.length>=2){sigs[0].value=data.signA||'';sigs[1].value=data.signB||''}renderAll()}
+function G(){var sigs=document.querySelectorAll('.signature-block .sign-line input');data.clientName=document.getElementById('clientName').value;data.clientPhone=document.getElementById('clientPhone').value;data.projectAddr=document.getElementById('projectAddr').value;data.quoteDate=document.getElementById('quoteDate').value;data.signDate=document.getElementById('signDate').value;data.signA=sigs[0]?sigs[0].value:'';data.signB=sigs[1]?sigs[1].value:'';data.activePlan=ci;return data}
+function autoSave(){if(data){G();saveData(SK,data)}}
+function renderAll(){renderM();renderP();renderT();renderC()}
+
+function renderM(){var c=document.getElementById('materialsContainer');c.innerHTML='';c.className='materials-list';(data.materials||[]).forEach(function(t,i){var d=document.createElement('div');d.className='mat-item'
+var ns=document.createElement('span');ns.className='mat-num';ns.textContent=(i+1)+'、';d.appendChild(ns)
+var ta=document.createElement('textarea');ta.value=t;ta.rows=2;ta.oninput=function(){data.materials[i]=this.value;scheduleAutoSave(SK,G)};d.appendChild(ta)
+var db=document.createElement('button');db.className='btn btn-sm btn-danger no-print';db.innerHTML='✕';db.onclick=function(){data.materials.splice(i,1);renderM();scheduleAutoSave(SK,G)};d.appendChild(db);c.appendChild(d)})}
+function addM(){data.materials.push('');renderM();scheduleAutoSave(SK,G)}
+
+function renderP(){var tc=document.getElementById('planTabs'),pc=document.getElementById('planPanels');tc.innerHTML='';pc.innerHTML=''
+;(data.plans||[]).forEach(function(p,pi){var tab=document.createElement('button');tab.className='plan-tab'+(pi===ci?' active':'');tab.textContent=p.name;tab.onclick=function(){ci=pi;renderP();scheduleAutoSave(SK,G)};tc.appendChild(tab)
+var panel=document.createElement('div');panel.className='plan-panel'+(pi===ci?' active':'')
+var nr=document.createElement('div');nr.style.cssText='margin-bottom:12px;';nr.appendChild(document.createTextNode('方案名称：'))
+var ni=document.createElement('input');ni.type='text';ni.value=p.name;ni.style.maxWidth='180px';ni.oninput=function(){p.name=this.value;renderP();scheduleAutoSave(SK,G)};nr.appendChild(ni)
+if(data.plans.length>1){var dp=document.createElement('button');dp.className='btn btn-sm btn-danger no-print';dp.textContent='删除';dp.onclick=function(){data.plans.splice(pi,1);if(ci>=data.plans.length)ci=data.plans.length-1;renderP();scheduleAutoSave(SK,G)};nr.appendChild(dp)}
+panel.appendChild(nr)
+var tw=document.createElement('div');tw.className='table-wrap';var tb=document.createElement('table')
+var th=document.createElement('thead');th.innerHTML='<tr><th style="width:36px">序号</th><th>项目名称</th><th style="width:80px">单价(元)</th><th style="width:80px">面积</th><th style="width:100px">小计</th><th class="no-print" style="width:40px">操作</th></tr>';tb.appendChild(th)
+var tbody=document.createElement('tbody')
+p.items.forEach(function(it,ii){var tr=document.createElement('tr')
+var td0=document.createElement('td');td0.className='row-num';td0.textContent=ii+1;tr.appendChild(td0)
+var td1=document.createElement('td');var i1=document.createElement('input');i1.type='text';i1.value=it.name;i1.placeholder='项目名称';i1.oninput=function(){it.name=this.value;scheduleAutoSave(SK,G)};td1.appendChild(i1);tr.appendChild(td1)
+var td2=document.createElement('td');var i2=document.createElement('input');i2.type='number';i2.step='any';i2.min='0';i2.value=it.price;i2.className='num-input';i2.oninput=function(){it.price=parseFloat(this.value)||0;calcPT(pi);scheduleAutoSave(SK,G)};td2.appendChild(i2);tr.appendChild(td2)
+var td3=document.createElement('td');var i3=document.createElement('input');i3.type='number';i3.step='any';i3.min='0';i3.value=it.area;i3.className='num-input';i3.oninput=function(){it.area=parseFloat(this.value)||0;calcPT(pi);scheduleAutoSave(SK,G)};td3.appendChild(i3);tr.appendChild(td3)
+var td4=document.createElement('td');td4.className='num-input';td4.style.fontWeight='500';td4.textContent='￥'+((it.price||0)*(it.area||0)).toFixed(2);tr.appendChild(td4)
+var td5=document.createElement('td');td5.className='table-actions no-print';var db=document.createElement('button');db.className='btn btn-sm btn-danger';db.textContent='✕';db.onclick=function(){p.items.splice(ii,1);renderP();scheduleAutoSave(SK,G)};td5.appendChild(db);tr.appendChild(td5)
+tbody.appendChild(tr)})
+tb.appendChild(tbody)
+var tf=document.createElement('tfoot');var fr=document.createElement('tr');fr.className='total-row'
+var ts=document.createElement('td');ts.colSpan=4;ts.style.textAlign='right';ts.textContent='工程总造价：';fr.appendChild(ts)
+var tv=document.createElement('td');tv.id='planTotal_'+pi;tv.className='final-total'
+var pt=0;p.items.forEach(function(it){pt+=(it.price||0)*(it.area||0)});tv.textContent='￥'+pt.toFixed(2);fr.appendChild(tv)
+var te=document.createElement('td');te.className='no-print';fr.appendChild(te)
+tf.appendChild(fr);tb.appendChild(tf);tw.appendChild(tb);panel.appendChild(tw)
+var nd=document.createElement('div');nd.style.cssText='margin-top:8px;font-size:13px;color:var(--text-light);';nd.textContent='主型材及优质五金配件按附件图纸施工包工包料包安全。';panel.appendChild(nd)
+var ab=document.createElement('div');ab.className='btn-group no-print';ab.style.marginTop='8px';var btn=document.createElement('button');btn.className='btn btn-sm btn-primary';btn.textContent='＋ 添加项目';btn.onclick=function(){p.items.push({name:'',price:0,area:0});renderP();scheduleAutoSave(SK,G)};ab.appendChild(btn);panel.appendChild(ab)
+pc.appendChild(panel)})}
+function calcPT(pi){var p=data.plans[pi];if(!p)return;var t=0;p.items.forEach(function(it){t+=(it.price||0)*(it.area||0)});var el=document.getElementById('planTotal_'+pi);if(el)el.textContent='￥'+t.toFixed(2)}
+function addPlan(){data.plans.push({name:'方案'+'一二三四五六'[data.plans.length]||'方案'+(data.plans.length+1),items:[{name:'',price:0,area:0}]});ci=data.plans.length-1;renderP();scheduleAutoSave(SK,G)}
+
+function renderT(){var c=document.getElementById('termsContainer');c.innerHTML='';c.className='materials-list';(data.terms||[]).forEach(function(t,i){var d=document.createElement('div');d.className='mat-item'
+var ns=document.createElement('span');ns.className='mat-num';ns.textContent=(i+1)+'、';d.appendChild(ns)
+var ta=document.createElement('textarea');ta.value=t;ta.rows=2;ta.oninput=function(){data.terms[i]=this.value;scheduleAutoSave(SK,G)};d.appendChild(ta)
+var db=document.createElement('button');db.className='btn btn-sm btn-danger no-print';db.innerHTML='✕';db.onclick=function(){data.terms.splice(i,1);renderT();scheduleAutoSave(SK,G)};d.appendChild(db);c.appendChild(d)})}
+function addT(){data.terms.push('');renderT();scheduleAutoSave(SK,G)}
+
+function renderC(){var c=document.getElementById('constructionContainer');c.innerHTML=''
+function rs(parent,items,pIdx){items.forEach(function(st,si){var sd=document.createElement('div');sd.style.cssText='margin-left:28px;margin-bottom:4px;display:flex;gap:8px;align-items:flex-start;'
+var sn=document.createElement('span');sn.className='mat-num';sn.textContent='('+(si+1)+')';sd.appendChild(sn)
+var ta=document.createElement('textarea');ta.value=st;ta.rows=1;ta.style.flex='1';ta.oninput=function(){data.construction[pIdx].items[si]=this.value;scheduleAutoSave(SK,G)};sd.appendChild(ta)
+var db=document.createElement('button');db.className='btn btn-sm btn-danger no-print';db.innerHTML='✕';db.onclick=function(){data.construction[pIdx].items.splice(si,1);renderC();scheduleAutoSave(SK,G)};sd.appendChild(db);parent.appendChild(sd)})}
+;(data.construction||[]).forEach(function(sec,idx){var sd=document.createElement('div');sd.style.cssText='margin-bottom:20px;padding:12px 16px;background:#f8f9fb;border-radius:6px;border:1px solid var(--border);'
+var tr=document.createElement('div');tr.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:10px;'
+var ns=document.createElement('span');ns.className='mat-num';ns.textContent='('+'一二三四五六七'[idx]+')';tr.appendChild(ns)
+var ti=document.createElement('input');ti.type='text';ti.value=sec.title;ti.style.flex='1';ti.style.fontWeight='600';ti.oninput=function(){data.construction[idx].title=this.value;scheduleAutoSave(SK,G)};tr.appendChild(ti)
+var ds=document.createElement('button');ds.className='btn btn-sm btn-danger no-print';ds.innerHTML='✕';ds.onclick=function(){data.construction.splice(idx,1);renderC();scheduleAutoSave(SK,G)};tr.appendChild(ds);sd.appendChild(tr)
+rs(sd,sec.items,idx)
+var asb=document.createElement('button');asb.className='btn btn-sm btn-outline no-print';asb.style.cssText='margin-left:28px;margin-top:6px;';asb.textContent='＋ 添加子项';asb.onclick=function(){data.construction[idx].items.push('');renderC();scheduleAutoSave(SK,G)};sd.appendChild(asb)
+c.appendChild(sd)})}
+function addC(){data.construction.push({title:'新施工做法',items:['']});renderC();scheduleAutoSave(SK,G)}
+
+function resetAll(){if(confirm('确认重置所有数据？此操作不可撤销。')){localStorage.removeItem('boming_'+SK);location.reload()}}
+init();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("sw.js").then(function(reg){
+      console.log("SW registered:", reg.scope);
+    }).catch(function(err){
+      console.log("SW registration failed:", err);
+    });
+  });
+}
+</script>
+</body>
+</html>
